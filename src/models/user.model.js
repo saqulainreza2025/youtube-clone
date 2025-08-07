@@ -89,3 +89,4 @@ userSchema.methods.generateRefreshToken = function () {
 };
 
 export const User = mongoose.model("User", userSchema);
+//User is created by mongoose so User can directly talk to the mongoDB database
