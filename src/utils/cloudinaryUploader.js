@@ -25,7 +25,7 @@ async function uploadOnCloudinary(filePath) {
     // Remove local file after upload
     fs.unlinkSync(filePath);
 
-    return cloudinaryResponse.secure_url;
+    return cloudinaryResponse.url;
   } catch (error) {
     console.error("❌ Cloudinary Upload Error:", error);
 
