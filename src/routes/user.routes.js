@@ -8,14 +8,8 @@ const router = Router();
 //middleware for file means images here
 router.route("/register").post(
   upload.fields([
-    {
-      name: "avatar",
-      maxCount: 1,
-    },
-    {
-      name: "coverImage",
-      maxCount: 1, //maxCount is nothing but no of files you want to upload
-    },
+    { name: "avatar", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
   ]),
   registerUser
 );

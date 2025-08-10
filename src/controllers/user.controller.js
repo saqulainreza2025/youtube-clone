@@ -36,6 +36,16 @@ const registerUser = asyncHandler(async (req, res) => {
   const avatarCloudinaryURL = await uploadOnCloudinary(avatarLocalPath);
   const coverImageCloudinaryURL = await uploadOnCloudinary(coverImageLocalPath);
 
+  //SOME LOGS
+  console.log("Request Body");
+  console.log(req.body);
+
+  console.log(
+    "--------------------------------------------------------------------------------------------------------------------"
+  );
+  console.log("Request Files");
+  console.log(req.files);
+
   //create user object - create entry in mongoDB
   const user = await User.create({
     username,

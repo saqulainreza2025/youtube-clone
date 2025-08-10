@@ -1,9 +1,13 @@
 import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+dotenv.config({
+  path: "../../.env",
+});
 
 // STEP-1: Cloudinary Configuration
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  cloud_name: process.env.CLOUDINARY_USERNAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
@@ -25,7 +29,7 @@ async function uploadOnCloudinary(filePath) {
     // Remove local file after upload
     fs.unlinkSync(filePath);
 
-    return cloudinaryResponse.url;
+    return cloudinaryResponse.secure_url;
   } catch (error) {
     console.error("❌ Cloudinary Upload Error:", error);
 
