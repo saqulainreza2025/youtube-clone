@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { registerUser } from "../controllers/user.controller.js";
+import { loginUser } from "../controllers/user.controller.js";
 import { upload } from "./../middleWares/multer.middleware.js";
+import { verifyJWT } from "../middleWares/auth.middleware.js";
+import {
+  logoutUser,
+  RefreshAccessToken,
+  userProfile,
+} from "../controllers/user.controller.js";
 
 const router = Router();
 
@@ -13,5 +20,14 @@ router.route("/register").post(
   ]),
   registerUser
 );
+
+router.route("/login").post(loginUser);
+
+//Secured Route
+router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/userprofile").get(verifyJWT, userProfile);
+
+//Non Secured Route
+router.route("/refresh-token").post(RefreshAccessToken);
 
 export default router;
