@@ -248,20 +248,143 @@ const userProfile = asyncHandler(async (req, res) => {
 
   const user = await User.findById(user_id);
 
-  const { username, email, fullName } = user;
+  const { username, email, fullName, password } = user;
 
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        { username, email, fullName },
+        { username, email, fullName, password },
         "User All Information"
       )
     );
 });
 
-export { registerUser, loginUser, logoutUser, RefreshAccessToken, userProfile };
+//Change User Password
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  //So to Change password user must be logged In
+  const user_id = req.user;
+  const userEnteredPassword = req.body.userEnteredPassword;
+  const newPassword = req.body.newPassword;
+
+  if (!user_id) {
+    throw new ApiError(401, "User not logged In");
+  }
+
+  //If user is looged in and we have the user_id then we can get the user password from from the database
+  const user = await User.findById(user_id);
+
+  const isPasswordCorrect = await user.isPasswordCorrect(userEnteredPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Password Entered Incorrect");
+  }
+
+  //This approch will not work bcoz If your User model hashes password in a pre('save') hook, findByIdAndUpdate will bypass it — the password will be stored as plain text
+  // await User.findByIdAndUpdate(
+  //   user_id,
+  //   {
+  //     password: newPassword,
+  //   },
+  //   { new: true }
+  // );
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: true });
+
+  return res.status(200).json(
+    new ApiError(
+      200,
+      {
+        password: newPassword,
+      },
+      "Password has been changed"
+    )
+  );
+});
+
+//Change User FullName
+const changeUserFullName = asyncHandler(async (req, res) => {
+  //Get the new FullName
+  const { newFullName } = req.body;
+
+  if (!newFullName || newFullName.trim() === "") {
+    throw new ApiError(400, "New full name is required");
+  }
+
+  //From auth middleware we will get the req.user
+  const user_id = req.user?._id;
+
+  if (!user_id) {
+    throw new ApiError(401, "Unauthorized User");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    user_id,
+    {
+      $set: {
+        fullName: newFullName,
+      },
+    },
+    { new: true }
+  ).select("-password");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "FullName is changed "));
+});
+
+//Always try to handle files in different Routes like change avatar or any thing related to file
+const changeAvatar = asyncHandler(async (req, res) => {
+  //From Multer we will get req.file not ❌req.files bcoz we want only one file
+
+  const avatarFilePathLocal = req.file?.path;
+
+  if (!avatarFilePathLocal) {
+    throw new ApiError(404, "Avatar file path is missing");
+  }
+
+  //If we have the path then upload on cloudinary
+  const cloudinaryAvatarPath = await uploadOnCloudinary(avatarFilePathLocal);
+
+  console.log(cloudinaryAvatarPath);
+
+  if (!cloudinaryAvatarPath) {
+    throw new ApiError(500, "Failed to upload avatar to Cloudinary");
+  }
+
+  //Now update the User
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: cloudinaryAvatarPath,
+      },
+    },
+    { new: true }
+  ).select("-password");
+
+  console.log(updatedUser);
+
+  //response
+  res.status(200).json(new ApiResponse(200, updatedUser, "Avatar is changes"));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  RefreshAccessToken,
+  userProfile,
+  changeCurrentPassword,
+  changeUserFullName,
+  changeAvatar,
+};
 
 // get user details from frontend
 // validation – not empty

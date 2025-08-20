@@ -7,6 +7,9 @@ import {
   logoutUser,
   RefreshAccessToken,
   userProfile,
+  changeCurrentPassword,
+  changeUserFullName,
+  changeAvatar,
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -26,7 +29,11 @@ router.route("/login").post(loginUser);
 //Secured Route
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/userprofile").get(verifyJWT, userProfile);
-
+router.route("/changeCurrentPassword").post(verifyJWT, changeCurrentPassword);
+router.route("/changefullname").post(verifyJWT, changeUserFullName);
+router
+  .route("/changeAvatar")
+  .post(verifyJWT, upload.single("avatar"), changeAvatar);
 //Non Secured Route
 router.route("/refresh-token").post(RefreshAccessToken);
 
