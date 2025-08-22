@@ -10,6 +10,7 @@ import {
   changeCurrentPassword,
   changeUserFullName,
   changeAvatar,
+  getWatchHistory,
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -33,8 +34,10 @@ router.route("/changeCurrentPassword").post(verifyJWT, changeCurrentPassword);
 router.route("/changefullname").post(verifyJWT, changeUserFullName);
 router
   .route("/changeAvatar")
-  .post(verifyJWT, upload.single("avatar"), changeAvatar);
+  .patch(verifyJWT, upload.single("avatar"), changeAvatar);
+
+router.route("/watchhistory").get(verifyJWT);
 //Non Secured Route
-router.route("/refresh-token").post(RefreshAccessToken);
+router.route("/refresh-token").post(RefreshAccessToken, getWatchHistory);
 
 export default router;
